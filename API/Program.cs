@@ -19,6 +19,10 @@ builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
 
 builder.Services.AddDbContext<TodosContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddCors(opt =>
+{
+    opt.AddDefaultPolicy(builder => builder.AllowAnyMethod().AllowAnyOrigin());
+});
 
 var app = builder.Build();
 
@@ -30,6 +34,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 
 app.MapGet("/todos", async (ITodosService _service) =>
 {
