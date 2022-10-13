@@ -17,12 +17,19 @@ ApplicationModuleDepedency.AddApplicationModule(builder.Services);
 DataBaseModuleDependency.AddDataBaseModule(builder.Services);
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig));
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddDbContext<TodosContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-builder.Services.AddCors(opt =>
-{
-    opt.AddDefaultPolicy(builder => builder.AllowAnyMethod().AllowAnyOrigin());
-});
+
+builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
+                builder =>
+                {
+                    builder
+                    .WithOrigins("http://127.0.0.1:5173")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
+                }));
 
 var app = builder.Build();
 
@@ -35,6 +42,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("CorsPolicy");
 
 app.MapGet("/todos", async (ITodosService _service) =>
 {
@@ -52,7 +60,7 @@ app.MapPost("/todos", async (TodosDTO todo, ITodosService _service) =>
 
 }).WithTags("Todos");
 
-app.MapPut("/todos/closedtodo", async(TodosDTO todo, ITodosService _service) =>
+app.MapPut("/todos/closedtodo", async (TodosDTO todo, ITodosService _service) =>
 {
     var result = await _service.Update(todo);
 
@@ -68,4 +76,3 @@ app.MapDelete("todos/{id:int}", async (int id, ITodosService _service) =>
 
 
 app.Run();
-
