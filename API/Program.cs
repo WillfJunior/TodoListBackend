@@ -1,5 +1,6 @@
 using Application;
 using Application.Configuration;
+using Domain.Entities;
 using Domain.Entities.Models.DTO;
 using Domain.Services;
 using Infra.Database;
@@ -27,8 +28,7 @@ builder.Services.AddCors(options => options.AddPolicy("CorsPolicy",
                     builder
                     .WithOrigins("http://127.0.0.1:5173")
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials();
+                    .AllowAnyHeader();
                 }));
 
 var app = builder.Build();
@@ -48,7 +48,7 @@ app.MapGet("/todos", async (ITodosService _service) =>
 {
     var result = await _service.GetAll();
 
-    return result.Success ? Results.Ok(result) : Results.NotFound();
+    return result.Success ? Results.Ok((List<Todos>)result.Data) : Results.NotFound(result);
 
 }).WithTags("Todos");
 
